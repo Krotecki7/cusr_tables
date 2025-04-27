@@ -1,13 +1,30 @@
 import psycopg2
+import os
 
 from typing import List, Optional, Tuple
+from src.database import CreatureDataBase
+from dotenv import load_dotenv
+
+load_dotenv()
+user = os.getenv('DATABASE_USER')
+password = os.getenv('DATABASE_PASSWORD')
+host = os.getenv('DATABASE_HOST')
+port = os.getenv('DATABASE_PORT')
 
 
-class DBManager:
-    def __init__(self, db_config):
-        """Инициализация DBManager и подключение к базе данных."""
-        self.connection = psycopg2.connect(**db_config)
-        self.cursor = self.connection.cursor()
+class DBManager(CreatureDataBase):
+    """
+    Класс для взаимодействия с БД.
+    """
+
+    def __init__(self, db_name: str) -> None:
+        """
+        Метод инициализации класса.
+        """
+        super().__init__(db_name, user, password, host, port)
+
+        self.connection = psycopg2.connect()
+        self.cur = self.connection.cursor()
 
     def create_tables(self) -> None:
         """Создает таблицы employers и vacancies в базе данных, если они не существуют."""
@@ -112,8 +129,4 @@ class DBManager:
 
 
 if __name__ == '__main__':
-    db_config = {'host': 'localhost',
-                 'database': 'my DT',
-                 'user': 'postgres',
-                 'password': 'Al.krotov7'}
-    DBManager.create_tables(db_config)
+    db = DBManager('my_DT')

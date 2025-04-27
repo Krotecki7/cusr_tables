@@ -41,4 +41,4 @@ def main(user_manager):
 
 
 if __name__ == '__main__':
-    main(user_manager=DBManager)
+    main(user_manager=DBManager('my DT'))
