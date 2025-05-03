@@ -6,17 +6,18 @@ import requests
 class APIManager:
     BASE_URL = "https://api.hh.ru"
 
-    employs_id = [9140614,
-                  11099814,
-                  11674968,
-                  11747243,
-                  11826459,
-                  5004072,
-                  5775464,
-                  4748227,
-                  36227,
-                  3643187
-                  ]
+    employs_id = [
+        9140614,
+        11099814,
+        11674968,
+        11747243,
+        11826459,
+        5004072,
+        5775464,
+        4748227,
+        36227,
+        3643187,
+    ]
 
     @staticmethod
     def get_companies(employs_id: List[int]) -> List[Dict[str, Any]]:

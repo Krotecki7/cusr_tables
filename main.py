@@ -41,4 +41,5 @@ def main(user_manager):
 
 
 if __name__ == '__main__':
-    main(user_manager=DBManager('my DT'))
+    db_manager = DBManager(db_name='hh_tables', user='postgres', host='localhost', password='Al.krotov7', port='5432')
+    main(user_manager=db_manager)

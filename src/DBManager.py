@@ -1,15 +1,16 @@
-import psycopg2
 import os
+from typing import List, Optional
 
-from typing import List, Optional, Tuple
-from src.database import CreatureDataBase
+import psycopg2
 from dotenv import load_dotenv
 
+from src.database import CreatureDataBase
+
 load_dotenv()
-user = os.getenv('DATABASE_USER')
-password = os.getenv('DATABASE_PASSWORD')
-host = os.getenv('DATABASE_HOST')
-port = os.getenv('DATABASE_PORT')
+user = os.getenv("DATABASE_USER")
+password = os.getenv("DATABASE_PASSWORD")
+host = os.getenv("DATABASE_HOST")
+port = os.getenv("DATABASE_PORT")
 
 
 class DBManager(CreatureDataBase):
@@ -17,64 +18,23 @@ class DBManager(CreatureDataBase):
     Класс для взаимодействия с БД.
     """
 
-    def __init__(self, db_name: str) -> None:
+    def __init__(
+        self, db_name: str, user: str, password: str, host: str, port: str
+    ) -> None:
         """
         Метод инициализации класса.
         """
         super().__init__(db_name, user, password, host, port)
+        self.db_config = {
+            "dbname": db_name,
+            "user": user,
+            "password": password,
+            "host": host,
+            "port": port,
+        }
 
-        self.connection = psycopg2.connect()
-        self.cur = self.connection.cursor()
-
-    def create_tables(self) -> None:
-        """Создает таблицы employers и vacancies в базе данных, если они не существуют."""
-        create_employers_table = """
-        DROP TABLE employers IF EXISTS
-        CREATE TABLE employers (
-            id SERIAL PRIMARY KEY,
-            name VARCHAR(255) NOT NULL,
-            vacancies_count INTEGER DEFAULT 0
-        );
-        """
-
-        create_vacancies_table = """
-        DROP TABLE vacancies IF EXISTS
-        CREATE TABLE vacancies (
-            id SERIAL PRIMARY KEY,
-            title VARCHAR(255) NOT NULL,
-            salary_min INTEGER,
-            salary_max INTEGER,
-            employer_id INTEGER REFERENCES employers(id)
-        );
-        """
-
-        self.cursor.execute(create_employers_table)
-        self.cursor.execute(create_vacancies_table)
-        self.connection.commit()
-
-    def insert_employer(self, name: str) -> int:
-        """Метод вставляет нового работодателя в таблицу employers."""
-        self.cursor.execute(
-            "INSERT INTO employers (name) VALUES (%s) RETURNING id;", (name,)
-        )
-        employer_id = self.cursor.fetchone()[0]
-        self.connection.commit()
-        return employer_id
-
-    def insert_vacancy(
-            self,
-            name: str,
-            salary_min: Optional[int],
-            salary_max: Optional[int],
-            employer_id: int,
-    ) -> None:
-        """метод вставляет новую вакансию в таблицу vacancies."""
-
-        self.cursor.execute(
-            "INSERT INTO vacancies (name, salary_min, salary_max, employer_id) VALUES (%s, %s, %s, %s);",
-            (name, salary_min, salary_max, employer_id),
-        )
-        self.connection.commit()
+        self.connection = psycopg2.connect(**self.db_config)
+        self.cursor = self.connection.cursor()
 
     def get_companies_and_vacancies_count(self) -> List:
         """метод получает список компаний и количество их вакансий."""
@@ -126,7 +86,3 @@ class DBManager(CreatureDataBase):
     def close(self):
         self.cursor.close()
         self.connection.close()
-
-
-if __name__ == '__main__':
-    db = DBManager('my_DT')
